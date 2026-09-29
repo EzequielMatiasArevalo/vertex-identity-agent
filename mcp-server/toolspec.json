@@ -1,0 +1,36 @@
+{
+  "tools": [
+    {
+      "name": "hello_world",
+      "description": "Returns a greeting from the private MCP server on Cloud Run.\n\n    Args:\n        name: Who to greet. Defaults to \"World\".\n    ",
+      "inputSchema": {
+        "properties": {
+          "name": {
+            "default": "World",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "title": "hello_worldArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "hello_worldOutput",
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "idempotentHint": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+# Project-specific configuration and deploy state
+config.env
+.state/
+
+# Generated at deploy time by scripts/04-deploy-agent.sh
+agent/*/.env
+agent/*/.agent_engine_config.json
+agent/*/certs/
+
+# adk deploy temp folders
+agent/*_tmp*/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

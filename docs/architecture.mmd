@@ -1,0 +1,33 @@
+flowchart LR
+  user(["User<br/>Gemini Enterprise / Playground / SDK"])
+
+  subgraph TENANT["Google-managed tenant project"]
+    agent["Agent Runtime<br/><b>private_agent</b> (ADK)<br/>identity: AGENT_IDENTITY"]
+    gw["Agent Gateway <b>GATEWAY_NAME</b><br/>AGENT_TO_ANYWHERE · MCP<br/>TLS inspection"]
+  end
+
+  subgraph PROJ["Your project PROJECT_ID"]
+    subgraph VPC["VPC VPC_NAME (dedicated)"]
+      na["Network attachment<br/><b>NETWORK_ATTACHMENT</b><br/>subnet SUBNET_RANGE (/28)"]
+      dns["Private Cloud DNS zone<br/>*.run.app → PSC_ADDRESS_IP"]
+      psc["PSC endpoint for Google APIs<br/><b>PSC_FORWARDING_RULE</b><br/>bundle all-apis"]
+    end
+    registry["Agent Registry (REGION)<br/>MCP_SERVICE · core-gapi-services"]
+    mcp["Cloud Run <b>MCP_SERVICE</b><br/>MCP /mcp · tool hello_world<br/>ingress=internal · IAM auth"]
+    sa["SA <b>MCP_INVOKER_SA</b><br/>roles/run.invoker"]
+  end
+
+  gapis[("Google APIs<br/>Gemini · IAM · Logging · BigQuery")]
+  internet(("Internet"))
+
+  user -->|query| agent
+  agent ==>|"all egress (HTTPS/gRPC)"| gw
+  gw -. "governed by" .-> registry
+  gw ==>|PSC interface| na
+  na -->|"*.run.app via DNS peering"| dns
+  na ==> psc
+  psc ==>|"internal traffic"| mcp
+  gw -->|"*.googleapis.com"| gapis
+  agent -. "impersonates for ID token" .-> sa
+  sa -. "run.invoker" .-> mcp
+  internet -. "404 (internal ingress)" .-x mcp
